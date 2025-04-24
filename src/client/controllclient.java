@@ -112,7 +112,7 @@ public class controllclient {
                             String fileName = selectedImage.getName();
                             String filePath = selectedImage.getAbsolutePath();
                             byte[] fileContent = Files.readAllBytes(selectedImage.toPath());
-                            output.writeByte(3); // Mã cho ảnh bí mật
+                            output.writeByte(3);
                             output.writeUTF(fileName);
                             output.writeLong(fileContent.length);
                             output.write(fileContent);
@@ -141,7 +141,7 @@ public class controllclient {
             String fileName = audioFile.getName();
             String filePath = audioFile.getAbsolutePath();
             byte[] fileContent = Files.readAllBytes(audioFile.toPath());
-            output.writeByte(5); // Mã cho tin nhắn thoại
+            output.writeByte(5);
             output.writeUTF(fileName);
             output.writeLong(fileContent.length);
             output.write(fileContent);
@@ -156,21 +156,21 @@ public class controllclient {
     private void sendMessage() {
         String message = view.getChattextarea().getText().trim();
 
-        if (!message.isEmpty()) { // Chỉ kiểm tra message không rỗng
+        if (!message.isEmpty()) {
             try {
                 boolean isEncrypted = view.getCboxmahoa().isSelected();
                 String finalMessage = message;
                 if (isEncrypted) {
                     finalMessage = view.encryptMessage(message);
-                    output.writeByte(4); // Mã cho tin nhắn mã hóa
+                    output.writeByte(4);
                 } else {
-                    output.writeByte(0); // Mã cho tin nhắn text
+                    output.writeByte(0);
                 }
                 output.writeUTF(finalMessage);
                 output.flush();
                 JPanel mePanel = view.createMePanel(view.getUsername() + ": " + finalMessage);
                 view.showMessagePanel(mePanel);
-                view.getChattextarea().setText(""); // Đặt lại thành chuỗi rỗng
+                view.getChattextarea().setText("");
             } catch (IOException e) {
                 JOptionPane.showMessageDialog(view, "Lỗi khi gửi tin nhắn: " + e.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
             }
@@ -181,7 +181,7 @@ public class controllclient {
         try {
             while (true) {
                 byte messageType = input.readByte();
-                if (messageType == 0) { // Tin nhắn text
+                if (messageType == 0) {
                     String message = input.readUTF();
                     SwingUtilities.invokeLater(() -> {
                         if (!message.startsWith(view.getUsername() + ": ")) {
@@ -189,7 +189,7 @@ public class controllclient {
                             view.showMessagePanel(youPanel);
                         }
                     });
-                } else if (messageType == 1) { // File
+                } else if (messageType == 1) {
                     String fileName = input.readUTF();
                     long fileSize = input.readLong();
                     byte[] fileContent = new byte[(int) fileSize];
@@ -201,7 +201,7 @@ public class controllclient {
                             view.showMessagePanel(filePanel);
                         });
                     }
-                } else if (messageType == 2) { // Ảnh
+                } else if (messageType == 2) {
                     String fileName = input.readUTF();
                     long fileSize = input.readLong();
                     byte[] fileContent = new byte[(int) fileSize];
@@ -213,7 +213,7 @@ public class controllclient {
                             view.showMessagePanel(imgPanel);
                         });
                     }
-                } else if (messageType == 3) { // Ảnh bí mật
+                } else if (messageType == 3) {
                     String fileName = input.readUTF();
                     long fileSize = input.readLong();
                     byte[] fileContent = new byte[(int) fileSize];
@@ -227,7 +227,7 @@ public class controllclient {
                             view.showMessagePanel(imgPanel);
                         });
                     }
-                } else if (messageType == 4) { // Tin nhắn mã hóa
+                } else if (messageType == 4) {
                     String message = input.readUTF();
                     SwingUtilities.invokeLater(() -> {
                         if (!message.startsWith(view.getUsername() + ": ")) {
@@ -235,7 +235,7 @@ public class controllclient {
                             view.showMessagePanel(youPanel);
                         }
                     });
-                } else if (messageType == 5) { // Tin nhắn thoại
+                } else if (messageType == 5) {
                     String fileName = input.readUTF();
                     long fileSize = input.readLong();
                     byte[] fileContent = new byte[(int) fileSize];

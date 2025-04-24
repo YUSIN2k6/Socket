@@ -110,7 +110,7 @@ public class clientUI extends JFrame {
         scrollPane.setViewportView(chattextarea);
         chattextarea.setLineWrap(true);
         chattextarea.setText("");
-        chattextarea.setForeground(Color.BLACK); // Đặt màu chữ thành đen ngay từ đầu
+        chattextarea.setForeground(Color.BLACK);
 
         JPanel pnsent = new JPanel();
         pnsent.setBounds(771, 0, 90, 50);
@@ -221,11 +221,10 @@ public class clientUI extends JFrame {
         messageArea.setBackground(new Color(206, 244, 180));
         messageArea.setText(message);
 
-        // Thêm thời gian
         JLabel timeLabel = new JLabel(LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")));
         timeLabel.setForeground(new Color(255, 255, 255));
         timeLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        timeLabel.setBounds(332, 145, 100, 20); // Góc dưới bên trái của khu vực tin nhắn
+        timeLabel.setBounds(332, 145, 100, 20);
         newMePn.add(timeLabel);
 
         chatContentPanel.add(newMePn);
@@ -255,17 +254,18 @@ public class clientUI extends JFrame {
         btnsearchmahoa.setBounds(474, 142, 54, 23);
         if (isEncrypted) {
             btnsearchmahoa.addActionListener(e -> {
-                String decryptedMessage = decryptMessage(message);
-                JOptionPane.showMessageDialog(this, "Tin nhắn gốc: " + decryptedMessage, "Giải mã", JOptionPane.INFORMATION_MESSAGE);
+                String decryptedMessage = showDecryptInputDialog(message);
+                if (decryptedMessage != null) {
+                    JOptionPane.showMessageDialog(this, "Tin nhắn gốc: " + decryptedMessage, "Giải mã", JOptionPane.INFORMATION_MESSAGE);
+                }
             });
         }
         newYouPn.add(btnsearchmahoa);
 
-        // Thêm thời gian
         JLabel timeLabel = new JLabel(LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")));
         timeLabel.setForeground(new Color(255, 255, 255));
         timeLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        timeLabel.setBounds(429, 145, 100, 20); // Góc dưới bên phải của khu vực tin nhắn
+        timeLabel.setBounds(429, 145, 100, 20);
         newYouPn.add(timeLabel);
 
         chatContentPanel.add(newYouPn);
@@ -303,11 +303,10 @@ public class clientUI extends JFrame {
         });
         newFilePn.add(btndownloadfile);
 
-        // Thêm thời gian
         JLabel timeLabel = new JLabel(LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")));
         timeLabel.setForeground(new Color(255, 255, 255));
         timeLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        timeLabel.setBounds(10, 90, 100, 20); // Dưới cùng bên trái
+        timeLabel.setBounds(10, 90, 100, 20);
         newFilePn.add(timeLabel);
 
         chatContentPanel.add(newFilePn);
@@ -361,16 +360,18 @@ public class clientUI extends JFrame {
         btnsearchsecretimg.setBounds(189, 142, 54, 23);
         if (secretMessage != null && !secretMessage.isEmpty()) {
             btnsearchsecretimg.addActionListener(e -> {
-                JOptionPane.showMessageDialog(this, "Tin nhắn bí mật: " + secretMessage, "Tin nhắn bí mật", JOptionPane.INFORMATION_MESSAGE);
+                String decryptedMessage = showDecryptInputDialog(secretMessage);
+                if (decryptedMessage != null) {
+                    JOptionPane.showMessageDialog(this, "Tin nhắn bí mật: " + decryptedMessage, "Tin nhắn bí mật", JOptionPane.INFORMATION_MESSAGE);
+                }
             });
         }
         newImgPn.add(btnsearchsecretimg);
 
-        // Thêm thời gian
         JLabel timeLabel = new JLabel(LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")));
         timeLabel.setForeground(new Color(255, 255, 255));
         timeLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        timeLabel.setBounds(10, 189, 100, 20); // Dưới cùng bên trái
+        timeLabel.setBounds(250, 170, 100, 20);
         newImgPn.add(timeLabel);
 
         chatContentPanel.add(newImgPn);
@@ -415,11 +416,10 @@ public class clientUI extends JFrame {
         });
         newVoicePn.add(btnDownload);
 
-        // Thêm thời gian
         JLabel timeLabel = new JLabel(LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")));
         timeLabel.setForeground(new Color(255, 255, 255));
         timeLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        timeLabel.setBounds(10, 90, 100, 20); // Dưới cùng bên trái
+        timeLabel.setBounds(10, 90, 100, 20);
         newVoicePn.add(timeLabel);
 
         chatContentPanel.add(newVoicePn);
@@ -515,7 +515,52 @@ public class clientUI extends JFrame {
 
         int result = JOptionPane.showConfirmDialog(this, panel, "Tin nhắn bí mật", JOptionPane.OK_CANCEL_OPTION);
         if (result == JOptionPane.OK_OPTION) {
-            return secretField.getText();
+            String message = secretField.getText();
+            if (!message.isEmpty()) {
+                return encryptSecretMessage(message);
+            }
+        }
+        return null;
+    }
+
+    private String encryptSecretMessage(String message) {
+        StringBuilder encrypted = new StringBuilder();
+        for (char c : message.toCharArray()) {
+            encrypted.append((char) (c + 32));
+        }
+        return encrypted.toString();
+    }
+
+    private String decryptSecretMessage(String message, int key) {
+        StringBuilder decrypted = new StringBuilder();
+        for (char c : message.toCharArray()) {
+            decrypted.append((char) (c - key));
+        }
+        return decrypted.toString();
+    }
+
+    private String showDecryptInputDialog(String encryptedMessage) {
+        JTextField keyField = new JTextField(5);
+        JPanel panel = new JPanel();
+        panel.add(new JLabel("Nhập mã giải mã:"));
+        panel.add(keyField);
+
+        int result = JOptionPane.showConfirmDialog(this, panel, "Giải mã tin nhắn", JOptionPane.OK_CANCEL_OPTION);
+        if (result == JOptionPane.OK_OPTION) {
+            try {
+                int key = Integer.parseInt(keyField.getText().trim());
+                String decryptedMessage = decryptSecretMessage(encryptedMessage, key);
+                if (key == 32) {
+                    return decryptedMessage;
+                } else {
+                    JOptionPane.showMessageDialog(this, "Kết quả giải mã với mã " + key + ": " + decryptedMessage, 
+                        "Mã không đúng", JOptionPane.WARNING_MESSAGE);
+                    return null;
+                }
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(this, "Vui lòng nhập một số hợp lệ!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                return null;
+            }
         }
         return null;
     }
